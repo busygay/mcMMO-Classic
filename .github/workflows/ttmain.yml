@@ -1,0 +1,49 @@
+# =========================================================================
+#             Final GitHub Actions Workflow for mcMMO-Classic
+#
+# Strategy: "Archaeologist Mode"
+# - Acknowledges the project is sunset and may fail to build.
+# - Uses the author-recommended 'mvn clean install'.
+# - Attempts to build from a specific, known-good tag ('1.6.1-RELEASE').
+# - Adds extensive debugging and strict failure checks.
+# =========================================================================
+
+name: Build mcMMO-Classic (Archaeologist Mode)
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    
+    # This ensures that if any step fails, the entire job stops immediately.
+    defaults:
+      run:
+        shell: bash
+
+    steps:
+      # Step 1: Checkout the specific tag for version 1.6.1
+      # We are not using a branch, but a specific historical point.
+      - name: 1. Checkout Code for Tag 1.6.1-RELEASE
+        uses: actions/checkout@v4
+        with:
+          # This is the crucial part: we check out the exact tag.
+          ref: '1.6.1-RELEASE'
+          # Fetch all history and tags to ensure the tag is found.
+          fetch-depth: 0
+
+      # Step 2: Set up JDK 8, the required Java version
+      - name: 2. Set up JDK 8
+        uses: actions/setup-java@v4
+        with:
+          java-version: '8'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      # Step 3: Attempt to build using the recommended command
+      - name: 3. Attempt Build with 'mvn clean install'
+        # We use the command from the README.
+        run: mvn -B clean install -DskipTests
+
+      # Step 4: Verify the build output (CRUCIAL DEBU
